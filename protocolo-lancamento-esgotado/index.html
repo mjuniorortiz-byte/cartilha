@@ -283,15 +283,11 @@ src="https://www.facebook.com/tr?id=376429001362594&ev=PageView&noscript=1"/></n
     opacity: 0;
     transform: translateY(24px);
     transition: opacity 0.7s cubic-bezier(.2,.9,.3,1), transform 0.7s cubic-bezier(.2,.9,.3,1);
-    /* will-change removido do estado estático — aplicado via JS só antes da animação */
-  }
-  .fade-in.animating {
     will-change: opacity, transform;
   }
   .fade-in.visible {
     opacity: 1;
     transform: translateY(0);
-    will-change: auto; /* libera a camada de composição após animar */
   }
   @media (prefers-reduced-motion: reduce) {
     .fade-in { opacity: 1; transform: none; transition: none; }
@@ -1881,17 +1877,8 @@ document.addEventListener('keydown', function(e){
   var observer = new IntersectionObserver(function(entries){
     entries.forEach(function(entry){
       if (entry.isIntersecting) {
-        var el = entry.target;
-        el.classList.add('animating'); // ativa will-change antes da animação
-        requestAnimationFrame(function(){
-          el.classList.add('visible'); // dispara a transição
-          // remove will-change após animação terminar (libera compositor)
-          el.addEventListener('transitionend', function cleanup(){
-            el.classList.remove('animating');
-            el.removeEventListener('transitionend', cleanup);
-          }, { once: true });
-        });
-        observer.unobserve(el);
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
       }
     });
   }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
